@@ -1,4 +1,4 @@
-**
+/**
  * Open Beer Filler
  * Copyright (c) 2020 Gerhard Potgieter [https://gerhardpotgieter.com]
  *
@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once;
+#pragma once
 
 /**
  * Pin definitions
