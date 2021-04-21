@@ -37,7 +37,7 @@
  */
 volatile bool fillSensor1Triggered = false;
 volatile bool fillSensor2Triggered = false;
-volatile bool fillSensor3Triggered = false;
+
 bool idleMessageDisplayed = false;
 enum ProgramState {UNDEF,IDLE,START,FILLING,STOP};
 ProgramState currentState = UNDEF;
@@ -52,7 +52,7 @@ void setupPins() {
   // Filler solenoids.
   pinMode(BEER_INLET_SOL_1, OUTPUT);
   pinMode(BEER_INLET_SOL_2, OUTPUT);
-  pinMode(BEER_INLET_SOL_3, OUTPUT);
+
 
   // CO2 solenoid.
   pinMode(CO2_PURGE_SOL, OUTPUT);
@@ -66,7 +66,7 @@ void setupPins() {
   // Fill sensors.
   pinMode(BEER_FILL_SENSOR_1, INPUT);
   pinMode(BEER_FILL_SENSOR_2, INPUT);
-  pinMode(BEER_FILL_SENSOR_3, INPUT);
+
   pinMode(BEER_FILL_SENSOR_POT, INPUT);
 
   // Start/Stop button.
@@ -90,17 +90,14 @@ void checkFillSensors() {
   } else {
     sensorValue = FILL_SENSORS_TRIGGER;
   }
-  if (sensorValue < analogRead(BEER_FILL_SENSOR_1)) {  
+  if (sensorValue < analogRead(BEER_FILL_SENSOR_1)) {
     triggerFullFillSensor1();
   }
-  
-  if (sensorValue < analogRead(BEER_FILL_SENSOR_2)) {  
+  if (sensorValue < analogRead(BEER_FILL_SENSOR_2)) {
     triggerFullFillSensor2();
   }
+
   
-  if (sensorValue < analogRead(BEER_FILL_SENSOR_3)) {
-    triggerFullFillSensor3();
-  }
 }
 
 /**
@@ -125,26 +122,17 @@ void triggerFullFillSensor2() {
   }
 }
 
-/**
- * Fired when fill sensor 1 is triggered as full.
- */
-void triggerFullFillSensor3() {
-  if (!fillSensor3Triggered && hasProgramState(FILLING)) {
-    closeBeerFillerTube(BEER_INLET_SOL_3);
-    fillSensor3Triggered = true;
-    Serial.println("Filler tube 3 closed");
-  }
-}
+
 
 /**
  * Return whether all fill sensors have been triggered or not.
  */
 bool allFillSensorsTriggered() {
-  return fillSensor1Triggered && fillSensor2Triggered && fillSensor3Triggered;
+  return fillSensor1Triggered && fillSensor2Triggered;
 }
 
 void resetFillSensorTriggers() {
-  fillSensor1Triggered = fillSensor2Triggered = fillSensor3Triggered = false;
+  fillSensor1Triggered = fillSensor2Triggered = false;
 }
 
 /**
@@ -168,7 +156,7 @@ void openAllBeerFillerTubes() {
   Serial.println("Opening all beer filler tubes");
   digitalWrite(BEER_INLET_SOL_1, HIGH);
   digitalWrite(BEER_INLET_SOL_2, HIGH);
-  digitalWrite(BEER_INLET_SOL_3, HIGH);
+  
 }
 
 /**
@@ -178,7 +166,7 @@ void closeAllBeerFillerTubes() {
   Serial.println("Closing all beer filler tubes");
   digitalWrite(BEER_INLET_SOL_1, LOW);
   digitalWrite(BEER_INLET_SOL_2, LOW);
-  digitalWrite(BEER_INLET_SOL_3, LOW);
+  
 }
 
 /**
