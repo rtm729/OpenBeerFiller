@@ -4,8 +4,6 @@
 Open Beer Filler is an Arduino Uno sketch for controlling a beer filling line. The idea was started by Christopher Harrison-Hawkes AKA [HarryBrew69 on YouTube](https://www.youtube.com/channel/UCIIYTzYpd8D7y816diZB0Dw). The sketch works by controlling a beer bottling line via a Arduino Uno and various sensors.
 
 ## Configuration
-Before uploading the sketch to your Arduino Uno be sure to modify the InputConfig.h and Config.h files to map it to your microcontroller pins. We have mapped the pins to default so if you follow the Schematic below it should work out of the box.
-
 ### InputConfig.h Definitions
 VARIABLE | DEFINITION
 --- | ---
@@ -35,6 +33,8 @@ VARIABLE_FILL_SENSOR_TRIGGER | Use a potentiometer to adjust trigger value
 
 CONINUOUS_FILLING | If this definition is enabled it will put the sketch in continous filling mode, meaning once it is done filling it will auto start with the next batch. This is for production use.
 
+Before uploading the sketch to your Arduino Uno be sure to modify the InputConfig.h and Config.h files to map it to your microcontroller pins. 
+
 ### Required Libraries
 - [TimerOne](https://playground.arduino.cc/Code/Timer1/)
 
@@ -42,7 +42,6 @@ CONINUOUS_FILLING | If this definition is enabled it will put the sketch in cont
 ![](.github/schematic.png)
 
 ## Feature Requests
-At present the sketch only supports the Arduino Uno, however we have plans in the works to introduce ESP8266 support with various other nice to have functionality such as remote setup, monitoring and control via a built in web page.
 
 ## Open Source
 The project is completely Open Source licensed under the GPL version 3 or above so you are free to use this code as long as you just give attribution. If you have the ability to help us out then please feel free to submit pull requests or even just log issues for bugs or feature request.
@@ -51,6 +50,3 @@ The project is completely Open Source licensed under the GPL version 3 or above 
 
 ### Missing InputConfig.h & Config.h files in your build
 If you are getting errors when trying to compile this sketch about missing Config.h and/or InputConfig.h files then it means your Arduino IDE is not picking up these files as part of the sketch. This is likely just an includes folder config error so check your includes folder paths.
-
-It is also possible you are running an outdated version of the Arduino IDE, in that case ensure you are running version 1.8.10+ of the Arduino IDE.
-
