@@ -18,17 +18,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once;
+ #pragma once
 
 // Library includes.
 // AVR(UNO) Libraries.
 #ifdef __AVR__
-#include <TimerOne.h>;
-#endif;
+#include <TimerOne.h>
+#endif
 
 // Project specific includes.
-#include "Config.h";
-#include "InputConfig.h";
+#include "Config.h"
+#include "InputConfig.h"
 
 /**
  * ***************************************************************************
@@ -247,7 +247,7 @@ void fillingState() {
       changeProgramState(START);
     #else
       changeProgramState(IDLE);
-    #endif;
+    #endif
   }
 }
 
