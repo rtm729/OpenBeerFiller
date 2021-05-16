@@ -3,7 +3,6 @@
  * Copyright (c) 2020 Gerhard Potgieter [https://gerhardpotgieter.com]
  *
  * Based on an idea by Christopher Harrison-Hawkes [https://harrisonsbrewery.com]
- * 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,14 +23,18 @@
 /**
  * Pin definitions
  */
-#define START_BUTTON 8
-#define BEER_INLET_SOL_1 5
-#define BEER_INLET_SOL_2 6
+#define START_BUTTON 10
+#define BEER_INLET_SOL_1 7
+#define BEER_INLET_SOL_2 8
 
 #define BEER_FILL_SENSOR_1 A0
 #define BEER_FILL_SENSOR_2 A1
 
-#define BEER_FILL_SENSOR_POT A3
-#define CO2_PURGE_SOL 4
-#define FILL_RAIL_SOL 3
-#define BEER_BELT_SOL 2
+#define CO2_PURGE_SOL 6
+#define FILL_RAIL_SOL 5
+#define FILL_RAM_PROX 11
+#define CAN_FEED_SOL 4
+#define CAN_FEED_REED_SWITCH 9
+#define ROT_ENC_A 2
+#define ROT_ENC_B 3
+#define ROT_ENC_BUTTON 12
