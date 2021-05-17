@@ -23,22 +23,36 @@
  *
  */
 #pragma once
+#include <Arduino.h>
+#include "Settings.h"
+int settingsVersion = 1;
 
-/**
- * Pin definitions
- */
-#define START_BUTTON 10
-#define BEER_INLET_SOL_1 7
-#define BEER_INLET_SOL_2 8
-#define BEER_FILL_SENSOR_1 A0
-#define BEER_FILL_SENSOR_2 A1
-// LCD I2C SDA A4
-// LCD I2C SCL A5
-#define CO2_PURGE_SOL 6
-#define FILL_RAIL_SOL 5
-#define FILL_RAM_PROX 11
-#define CAN_FEED_SOL 4
-#define CAN_FEED_REED_SWITCH 9
-#define ROT_ENC_A 2
-#define ROT_ENC_B 3
-#define ROT_ENC_BUTTON 12
+
+
+void EEPROM16_Write(uint8_t a, uint16_t b) {
+  Serial.println("Writing to EEPROM");
+  EEPROM.write(a, lowByte(b));
+  EEPROM.write(a+1, highByte(b));
+}
+
+
+uint16_t EEPROM16_Read(uint8_t a) {
+  return word(EEPROM.read(a+1), EEPROM.read(a));
+}
+
+
+void firstRunSettings() {
+  // If EEPROM position 0 has not been set to settingsVersion, assume first run
+  if (!(EEPROM16_Read(0) == settingsVersion)) { 
+
+    // Write defaults to EEPROM
+    EEPROM16_Write(EEPROM_EMPTY_CAN_FEED_CYCLE, CAN_FEED_CYCLE);
+    EEPROM16_Write(EEPROM_FILL_SENSOR_TRIGGER, FILL_SENSOR_TRIGGER);
+    EEPROM16_Write(EEPROM_CO2_PURGE_TIME, CO2_PURGE);
+    EEPROM16_Write(EEPROM_CO2_RETRACTION_PURGE_PERIOD, CO2_RETRACTION_CYCLE);
+    EEPROM16_Write(EEPROM_CO2_RETRACTION_CYCLE_DELAY, CO2_RETRACTION_DELAY);
+    EEPROM16_Write(EEPROM_FILL_RAM_CYCLE_DELAY, FILL_RAM_DELAY);
+
+    EEPROM16_Write(0, settingsVersion);
+  }
+}

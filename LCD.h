@@ -1,3 +1,4 @@
+
 /**
  * Open Beer Filler
  * Copyright (c) 2020 Gerhard Potgieter [https://gerhardpotgieter.com]
@@ -22,23 +23,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
 
-/**
- * Pin definitions
- */
-#define START_BUTTON 10
-#define BEER_INLET_SOL_1 7
-#define BEER_INLET_SOL_2 8
-#define BEER_FILL_SENSOR_1 A0
-#define BEER_FILL_SENSOR_2 A1
-// LCD I2C SDA A4
-// LCD I2C SCL A5
-#define CO2_PURGE_SOL 6
-#define FILL_RAIL_SOL 5
-#define FILL_RAM_PROX 11
-#define CAN_FEED_SOL 4
-#define CAN_FEED_REED_SWITCH 9
-#define ROT_ENC_A 2
-#define ROT_ENC_B 3
-#define ROT_ENC_BUTTON 12
+#pragma once
+#include <Arduino.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h> // LiquidCrystal_I2C.h: https://github.com/johnrickman/LiquidCrystal_I2C
+#include <Encoder.h> // http://www.pjrc.com/teensy/td_libs_Encoder.html
+
+#include "InputConfig.h"
+#include "Settings.h"
+
+void updateLine(int line, char output[]);
+void setupLCD();
+void rotEncRead();
+void showDisplay(char currentStateText[], int filledCans);

@@ -3,6 +3,10 @@
  * Copyright (c) 2020 Gerhard Potgieter [https://gerhardpotgieter.com]
  *
  * Based on an idea by Christopher Harrison-Hawkes [https://harrisonsbrewery.com]
+ * 
+ * Based on Modifications By David Gray (https://github.com/N3MIS15)
+ * 
+ * Modified by Ryan Moses (https://github.com/rtm729)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,17 +22,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
- #pragma once
+#pragma once
 
 // Library includes.
-// AVR(UNO) Libraries.
+// AVR(UNO) Libraries.'
+#include <Arduino.h>
+#include <EEPROM.h>
 #ifdef __AVR__
-#include <TimerOne.h>
+#include "TimerOne.h"
+#include "LiquidCrystal_I2C.h"
 #endif
 
 // Project specific includes.
 #include "Config.h"
 #include "InputConfig.h"
+#include "LCD.h"
+#include "Settings.h"
 
 /**
  * ***************************************************************************
@@ -37,11 +46,11 @@
  */
 volatile bool fillSensor1Triggered = false;
 volatile bool fillSensor2Triggered = false;
-
 bool idleMessageDisplayed = false;
-enum ProgramState {UNDEF,IDLE,START,FILLING,STOP};
+enum ProgramState {UNDEF, IDLE, START, LOWERING_FILLER, PRE_PURGE, FILLING, POST_PURGE, STOP};
+char ProgramStateText[][17] = {"UNDEF", "Start To Proceed", "Feed Empty Cans", "Lowering Filler", "Co2 Purge", "Filling", "Retraction Purge",  "Stop"};
 ProgramState currentState = UNDEF;
-int sensorValue;
+int cansFilled = 0;
 
 /**
  * ***************************************************************************
@@ -57,17 +66,22 @@ void setupPins() {
   // CO2 solenoid.
   pinMode(CO2_PURGE_SOL, OUTPUT);
 
-  // Fill rail solenoid.
+  // Fill cylinder solenoid.
   pinMode(FILL_RAIL_SOL, OUTPUT);
 
-  // Beer belt solenoid.
-  pinMode(BEER_BELT_SOL, OUTPUT);
+  // Fill cylinder solenoid.
+  pinMode(FILL_RAM_PROX, INPUT);
+
+  // Can feed cylinder solenoid.
+  pinMode(CAN_FEED_SOL, OUTPUT);
+
+  // Can feed cylinder reed switch.
+  pinMode(CAN_FEED_REED_SWITCH, INPUT);
 
   // Fill sensors.
   pinMode(BEER_FILL_SENSOR_1, INPUT);
   pinMode(BEER_FILL_SENSOR_2, INPUT);
 
-  pinMode(BEER_FILL_SENSOR_POT, INPUT);
 
   // Start/Stop button.
   pinMode(START_BUTTON, INPUT);
@@ -85,19 +99,12 @@ void setupFillSensorsTimer() {
  * Check if the fill sensors have been triggered.
  */
 void checkFillSensors() {
-  if (VARIABLE_FILL_SENSOR_TRIGGER) {
-    sensorValue = analogRead(BEER_FILL_SENSOR_POT);
-  } else {
-    sensorValue = FILL_SENSORS_TRIGGER;
-  }
-  if (sensorValue < analogRead(BEER_FILL_SENSOR_1)) {
+  if (EEPROM16_Read(EEPROM_FILL_SENSOR_TRIGGER) < analogRead(BEER_FILL_SENSOR_1)) {
     triggerFullFillSensor1();
   }
-  if (sensorValue < analogRead(BEER_FILL_SENSOR_2)) {
+  if (EEPROM16_Read(EEPROM_FILL_SENSOR_TRIGGER) < analogRead(BEER_FILL_SENSOR_2)) {
     triggerFullFillSensor2();
   }
-
-  
 }
 
 /**
@@ -112,7 +119,7 @@ void triggerFullFillSensor1() {
 }
 
 /**
- * Fired when fill sensor 1 is triggered as full.
+ * Fired when fill sensor 2 is triggered as full.
  */
 void triggerFullFillSensor2() {
   if (!fillSensor2Triggered && hasProgramState(FILLING)) {
@@ -121,6 +128,7 @@ void triggerFullFillSensor2() {
     Serial.println("Filler tube 2 closed");
   }
 }
+
 
 
 
@@ -157,6 +165,9 @@ void openAllBeerFillerTubes() {
   digitalWrite(BEER_INLET_SOL_1, HIGH);
   digitalWrite(BEER_INLET_SOL_2, HIGH);
   
+
+
+
 }
 
 /**
@@ -166,21 +177,7 @@ void closeAllBeerFillerTubes() {
   Serial.println("Closing all beer filler tubes");
   digitalWrite(BEER_INLET_SOL_1, LOW);
   digitalWrite(BEER_INLET_SOL_2, LOW);
-  
-}
 
-/**
- * Open the CO2 purge solenoid, wait a while and then close it again.
- */
-void purgeCO2( bool retract = false ) {
-  Serial.println("Purging CO2");
-  digitalWrite(CO2_PURGE_SOL, HIGH);
-  if(!retract) {
-    delay(CO2_PURGE_PERIOD);
-  } else {
-    delay(CO2_PURGE_RETRACTION_PERIOD);
-  }
-  digitalWrite(CO2_PURGE_SOL, LOW);
 }
 
 /**
@@ -189,26 +186,31 @@ void purgeCO2( bool retract = false ) {
 void raiseFillerTubes() {
   Serial.println("Raising filler tubes");
   digitalWrite(FILL_RAIL_SOL, HIGH);
-  delay(CO2_PURGE_RETRACTION_DELAY); // We use CO2_PURGE_RETRACTION_DELAY here as we want to start purging with CO2 as the fill rail raises.
+  delay(EEPROM16_Read(EEPROM_CO2_RETRACTION_CYCLE_DELAY)); // We use CO2_POST_PURGE_DELAY here as we want to start purging with CO2 as the fill rail raises.
 }
 
 /**
  * Lower the filler tubes into the bottles.
  */
 void lowerFillerTubes() {
-  Serial.println("Lowering filler tubes");
+  Serial.println("Lowering fill ram");
   digitalWrite(FILL_RAIL_SOL, LOW);
-  delay(FILLER_TUBE_MOVEMENT_DELAY);
+  Serial.println("Waiting for ram prox");
+  while (digitalRead(11) == LOW);
+  Serial.println("Ram prox triggered");
+  delay(EEPROM16_Read(EEPROM_FILL_RAM_CYCLE_DELAY));
 }
 
 /**
- * Move the beer belt, wait a while and then stop it again.
+ * Move the can feed air cylinder, wait a while and then return it to home position.
  */
-void moveBeerBelt() {
-  Serial.println( "Moving beer belt" );
-  digitalWrite(BEER_BELT_SOL, HIGH);
-  delay(MOVE_BEER_BELT_PERIOD);
-  digitalWrite(BEER_BELT_SOL, LOW);
+void canFeedCycle() {
+  Serial.println( "Can Feed Cycle" );
+  digitalWrite(CAN_FEED_SOL, HIGH);
+  Serial.println("Waiting for can feed prox");
+  while (digitalRead(9) == LOW);
+  delay(EEPROM16_Read(EEPROM_EMPTY_CAN_FEED_CYCLE));
+  digitalWrite(CAN_FEED_SOL, LOW);
 }
 
 /**
@@ -226,9 +228,27 @@ void idleState() {
  * Code to run when we are in the START ProgramState.
  */
 void startState() {
-  moveBeerBelt();
+  canFeedCycle();
+  //lowerFillerTubes();
+  changeProgramState(LOWERING_FILLER);
+}
+
+/**
+ * Code to run when we are in the Lowering Filler ProgramState.
+ */
+void loweringFillerState() {
   lowerFillerTubes();
-  purgeCO2();
+  changeProgramState(PRE_PURGE);
+}
+
+/**
+ * Code to run when we are in the PRE_PURGE ProgramState.
+ */
+void prePurgeState() {
+  Serial.println("Co2 Purge");
+  digitalWrite(CO2_PURGE_SOL, HIGH);
+  delay(EEPROM16_Read(EEPROM_CO2_PURGE_TIME));
+  digitalWrite(CO2_PURGE_SOL, LOW);
   openAllBeerFillerTubes();
   changeProgramState(FILLING);
 }
@@ -239,16 +259,32 @@ void startState() {
 void fillingState() {
   // Check if we are done filling.
   if(allFillSensorsTriggered()){
+    cansFilled++;
+    cansFilled++;
     raiseFillerTubes();
-    purgeCO2(true);
-    resetFillSensorTriggers();
-    // If done filling, check if we want to do continuous filling or go back to the UNDEF state.
-    #if defined(CONINUOUS_FILLING)
-      changeProgramState(START);
-    #else
-      changeProgramState(IDLE);
-    #endif
+    changeProgramState(POST_PURGE);
   }
+}
+
+/**
+ * Code to run when we are in the POST_PURGE ProgramState.
+ */
+void postPurgeState() {
+  if(CO2_RETRACTION_CYCLE) {
+    Serial.println("Retraction Co2 Purge");
+    digitalWrite(CO2_PURGE_SOL, HIGH);
+    delay(EEPROM16_Read(EEPROM_CO2_RETRACTION_PURGE_PERIOD));
+    digitalWrite(CO2_PURGE_SOL, LOW);
+  }
+
+  resetFillSensorTriggers();
+
+  // If done filling, check if we want to do continuous filling or go back to the UNDEF state.
+  #if defined(CONTINUOUS_FILLING)
+    changeProgramState(START);
+  #else
+    changeProgramState(IDLE);
+  #endif
 }
 
 /**
@@ -293,7 +329,7 @@ void readStopButton() {
 void resetUnit() {
   Serial.println("Reseting unit");
   closeAllBeerFillerTubes();
-  digitalWrite(BEER_BELT_SOL, LOW);
+  digitalWrite(CAN_FEED_SOL, LOW);
   raiseFillerTubes();
   digitalWrite(CO2_PURGE_SOL, LOW);
   Serial.println("Done resetting unit");
@@ -310,7 +346,9 @@ void changeProgramState(ProgramState state) {
   }
   currentState = state;
   Serial.print("Program state changed: ");
-  Serial.println(currentState);
+  Serial.println(ProgramStateText[currentState]);
+
+
 }
 
 /**
@@ -328,7 +366,10 @@ bool hasProgramState(ProgramState state) {
  */
 void alwaysRun() {
   readStopButton();
+  rotEncRead();
+  showDisplay(ProgramStateText[currentState], cansFilled);
 }
+
 
 /**
  * ***************************************************************************
@@ -341,6 +382,8 @@ void alwaysRun() {
  */
 void setup() {
   Serial.begin(115200);//Serial.begin(9600);
+  firstRunSettings();
+  setupLCD();
   setupPins();
   setupFillSensorsTimer();
   resetUnit();
@@ -357,8 +400,17 @@ void loop() {
     case START:
       startState();
       break;
+    case LOWERING_FILLER:
+      loweringFillerState();
+      break;
+    case PRE_PURGE:
+      prePurgeState();
+      break;
     case FILLING:
       fillingState();
+      break;
+    case POST_PURGE:
+      postPurgeState();
       break;
     case STOP:
       stopState();
