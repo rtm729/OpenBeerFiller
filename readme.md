@@ -18,20 +18,19 @@ LCD I2C SCL Pin A5 |
 ### InputConfig.h Definitions
 VARIABLE | DEFINITION
 --- | ---
-
 ROT_ENC_A 2 | CLK on rotary encoder
 ROT_ENC_B 3 | DT on rotary encoder
 CAN_FEED_SOL Pin 4 | The pin controlling the solenoid for moving the cans forward
 FILL_RAIL_SOL Pin 5 | The pin controlling the solenoid for lifting and dropping the filler rail
 CO2_PURGE_SOL Pin 6 | The pin controlling the solenoid for releasing CO2
 BEER_INLET_SOL_1 Pin 7  | The pin controlling the solenoid for beer tube 1
-BEER_INLET_SOL_2 Pin 8  | The pin controlling the solenoid for beer tube 2
+BEER_INLET_SOL_2 Pin 8 | The pin controlling the solenoid for beer tube 2
 CAN_FEED_REED_SWITCH Pin 9 | This pin triggers can feed solenoid to return cylinder home
 START_BUTTON Pin 10 | The pin on which the start button is attached. 5v to Pin 10 when pressed
 FILL_RAM_PROX Pin 11 | This pin receives Prox signal when filler nozzle air cylinder is lowered 
 ROT_ENC_BUTTON 12 | SW on rotary encoder
-BEER_FILL_SENSOR_1 Pin A0  | The pin that senses when the fill sensor for beer tube 1 is triggered
-BEER_FILL_SENSOR_2 Pin A1  | The pin that senses when the fill sensor for beer tube 2 is triggered
+BEER_FILL_SENSOR_1 Pin A0 | The pin that senses when the fill sensor for beer tube 1 is triggered
+BEER_FILL_SENSOR_2 Pin A1 | The pin that senses when the fill sensor for beer tube 2 is triggered
 
 ### Config.h Definitions
 VARIABLE | DEFINITION
