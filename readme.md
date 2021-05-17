@@ -10,10 +10,10 @@ Rotary endcoder allows machine timer adjustments via LCD + encoder. Settings to 
 Before uploading the sketch to your Arduino Uno be sure to modify the InputConfig.h and Config.h files to map it to your microcontroller pins. We have mapped the pins to default so if you follow the Schematic below it should work out of the box.
 
 ## LCD 
-VARIABLE | DEFINITION
+ | PIN
 --- | ---
-LCD I2C SDA Pin A4 | 
-LCD I2C SCL Pin A5 | 
+LCD I2C SDA | A4
+LCD I2C SCL | A6
 
 ### InputConfig.h Definitions
 VARIABLE | DEFINITION
