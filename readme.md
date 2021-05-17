@@ -52,7 +52,7 @@ CONINUOUS_FILLING | If this definition is enabled it will put the sketch in cont
 - [Encoder](http://www.pjrc.com/teensy/td_libs_Encoder.html)
 
 ## Schematic
-
+![](.github/schematic.png)
 
 ## Feature Requests
 At present the sketch only supports the Arduino Uno, however we have plans in the works to introduce ESP8266 support with various other nice to have functionality such as remote setup, monitoring and control via a built in web page.
