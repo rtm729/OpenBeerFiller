@@ -18,8 +18,8 @@ LCD I2C SCL Pin A5 |
 ### InputConfig.h Definitions
 VARIABLE | DEFINITION
 --- | ---
-ROT_ENC_A 2 | CLK on rotary encoder
-ROT_ENC_B 3 | DT on rotary encoder
+ROT_ENC_A Pin 2 | CLK on rotary encoder
+ROT_ENC_B Pin 3 | DT on rotary encoder
 CAN_FEED_SOL Pin 4 | The pin controlling the solenoid for moving the cans forward
 FILL_RAIL_SOL Pin 5 | The pin controlling the solenoid for lifting and dropping the filler rail
 CO2_PURGE_SOL Pin 6 | The pin controlling the solenoid for releasing CO2
@@ -48,8 +48,8 @@ CONINUOUS_FILLING | If this definition is enabled it will put the sketch in cont
 
 ### Required Libraries
 - [TimerOne](https://playground.arduino.cc/Code/Timer1/)
-- [LiquidCrystal_I2C] https://github.com/johnrickman/LiquidCrystal_I2C
-- [Encoder] // http://www.pjrc.com/teensy/td_libs_Encoder.html
+- [LiquidCrystal_I2C](https://github.com/johnrickman/LiquidCrystal_I2C)
+- [Encoder](http://www.pjrc.com/teensy/td_libs_Encoder.html)
 
 ## Schematic
 
